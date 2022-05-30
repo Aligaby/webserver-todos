@@ -1,5 +1,4 @@
 const http = require("http");
-const { monitorEventLoopDelay } = require("perf_hooks");
 const url = require("url");
 
 const server = http.createServer();
