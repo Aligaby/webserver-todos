@@ -84,7 +84,10 @@ function deleteMethod(idTodos, request, response) {
   }
 }
 
-function patchMethod(idTodos, request, response) {}
+function patchMethod(idTodos, request, response) {
+  const findIndexMyId = myData.findIndex((item) => item.id === +idTodos);
+  console.log(findIndexMyId);
+}
 
 server.on("request", (request, response) => {
   const parsedUrl = url.parse(request.url, true);
