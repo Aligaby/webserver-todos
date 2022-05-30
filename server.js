@@ -40,6 +40,11 @@ function requestOnBody(request) {
 
 function getMethodOnlyId(idTodos, request, response) {
   const searchInArray = myData.filter((item) => item.id === +idTodos);
+
+  if (searchInArray.length === 0) {
+    throw new Error("This ID is not exists");
+  }
+
   response.setHeader("Content-Type", "application/json");
   response.writeHead(200);
   response.end(JSON.stringify(searchInArray));
