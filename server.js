@@ -1,4 +1,5 @@
 const http = require("http");
+const { monitorEventLoopDelay } = require("perf_hooks");
 const url = require("url");
 
 const server = http.createServer();
@@ -50,7 +51,7 @@ function postMethod(request, response) {
       }
 
       if (!bodyTodos.dueDate) {
-        bodyTodos.dueDate = null;
+        bodyTodos.dueDate = "unknown";
       }
 
       if (!bodyTodos.isComplete) {
@@ -86,7 +87,36 @@ function deleteMethod(idTodos, request, response) {
 
 function patchMethod(idTodos, request, response) {
   const findIndexMyId = myData.findIndex((item) => item.id === +idTodos);
-  console.log(findIndexMyId);
+
+  let body = "";
+  request.on("data", (chunk) => {
+    body += chunk;
+  });
+
+  request.on("end", () => {
+    try {
+      const myIdObject = JSON.parse(body);
+      const bodyTodos = myData[findIndexMyId];
+
+      const newTodo = {
+        title: bodyTodos.title,
+        description: bodyTodos.description,
+      };
+
+      if (myIdObject.title) {
+        newTodo["title"] = myIdObject.title;
+      }
+      if (myIdObject.description) {
+        newTodo["description"] = myIdObject.description;
+      }
+
+      myData[findIndexMyId] = { ...myData[findIndexMyId], ...newTodo };
+      response.setHeader("Content-Type", "application/json");
+      response.end(JSON.stringify(myData[findIndexMyId]));
+    } catch (err) {
+      response.end(`Don't send correct data => ${err}`);
+    }
+  });
 }
 
 server.on("request", (request, response) => {
